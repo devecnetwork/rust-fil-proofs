@@ -187,6 +187,24 @@ jobs:
           environment:
             RUST_TEST_THREADS: 1
 
+  test_blst_ignored:
+    docker:
+      - image: filecoin/rust:latest
+    working_directory: /mnt/crate
+    resource_class: 2xlarge+
+    parameters:
+      crate:
+        type: string
+    steps:
+      - configure_environment_variables
+      - checkout
+      - attach_workspace:
+          at: "."
+      - restore_cache:
+          keys:
+            - cargo-v28-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{ arch }}
+      - restore_parameter_cache
+
       - run:
           name: Test with blst enabled (<< parameters.crate >>)
           command: |
@@ -407,24 +425,28 @@ workflows:
           requires:
             - cargo_fetch
             - ensure_groth_parameters_and_keys_linux
+            
       - test_ignored_release:
           name: test_ignored_release_storage_proofs_post
           crate: "storage-proofs/post"
           requires:
             - cargo_fetch
             - ensure_groth_parameters_and_keys_linux
+            
       - test_ignored_release:
           name: test_ignored_release_storage_proofs_core
           crate: "storage-proofs/core"
           requires:
             - cargo_fetch
             - ensure_groth_parameters_and_keys_linux
+            
       - test_ignored_release:
           name: test_ignored_release_storage_proofs_porep
           crate: "storage-proofs/porep"
           requires:
             - cargo_fetch
             - ensure_groth_parameters_and_keys_linux
+            
       - test_ignored_release:
           name: test_ignored_release_filecoin_proofs
           crate: "filecoin-proofs"
@@ -444,6 +466,13 @@ workflows:
             - cargo_fetch
             - ensure_groth_parameters_and_keys_linux
 
+      - test_blst_ignored:
+          name: test_blst_ignored_filecoin_proofs
+          crate: "filecoin-proofs"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
       - test:
           name: test_filecoin_proofs
           crate: "filecoin-proofs"
@@ -453,6 +482,13 @@ workflows:
 
       - test_blst:
           name: test_blst_storage_proofs_core
+          crate: "storage-proofs-core"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
+      - test_blst_ignored:
+          name: test_blst_ignored_storage_proofs_core
           crate: "storage-proofs-core"
           requires:
             - cargo_fetch
@@ -472,6 +508,13 @@ workflows:
             - cargo_fetch
             - ensure_groth_parameters_and_keys_linux
 
+      - test_blst_ignored:
+          name: test_blst_ignored_storage_proofs_post
+          crate: "storage-proofs-post"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
       - test:
           name: test_storage_proofs_post
           crate: "storage-proofs-post"
@@ -482,6 +525,13 @@ workflows:
 
       - test_blst:
           name: test_blst_storage_proofs_porep
+          crate: "storage-proofs-porep"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
+      - test_blst_ignored:
+          name: test_blst_ignored_storage_proofs_porep
           crate: "storage-proofs-porep"
           requires:
             - cargo_fetch
@@ -505,13 +555,6 @@ workflows:
       - test:
           name: test_fil_proofs_tooling
           crate: "fil-proofs-tooling"
-          requires:
-            - cargo_fetch
-            - ensure_groth_parameters_and_keys_linux
-
-      - test_blst:
-          name: test_blst_sha2raw
-          crate: "sha2raw"
           requires:
             - cargo_fetch
             - ensure_groth_parameters_and_keys_linux
@@ -551,7 +594,6 @@ workflows:
           requires:
             - cargo_fetch
             - ensure_groth_parameters_and_keys_linux
-
 
 
       - bench:
