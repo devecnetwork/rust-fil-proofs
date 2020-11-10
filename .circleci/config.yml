@@ -49,6 +49,9 @@ jobs:
       - image: filecoin/rust:latest
     working_directory: /mnt/crate
     resource_class: 2xlarge+
+    parameters:
+      crate:
+        type: string
     steps:
       - configure_environment_variables
       - checkout
@@ -59,8 +62,8 @@ jobs:
             - cargo-v28-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{ arch }}
       - restore_parameter_cache
       - run:
-          name: Test
-          command: cargo +$(cat rust-toolchain) test --verbose --workspace
+          name: Test (<< parameters.crate >>)
+          command: cargo +$(cat rust-toolchain) test --verbose --package << parameters.crate >>
           no_output_timeout: 15m
       - run:
           name: Prune the output files
@@ -172,6 +175,9 @@ jobs:
       - image: filecoin/rust:latest
     working_directory: /mnt/crate
     resource_class: 2xlarge+
+    parameters:
+      crate:
+        type: string
     steps:
       - configure_environment_variables
       - checkout
@@ -182,22 +188,22 @@ jobs:
             - cargo-v28-{{ checksum "rust-toolchain" }}-{{ checksum "Cargo.toml" }}-{{ checksum "Cargo.lock" }}-{{ arch }}
       - restore_parameter_cache
       - run:
-          name: Test ignored with blst enabled 
+          name: Test ignored with blst enabled (<< parameters.crate >>)
           command: |
             ulimit -n 20000
             ulimit -u 20000
             ulimit -n 20000
-            cargo +nightly -Zpackage-features test --all --no-default-features --features gpu,blst --verbose --release --test api -- --ignored
+            cargo +nightly -Zpackage-features test --all --no-default-features --features gpu,blst --verbose --release --test api --package << parameters.crate >> -- --ignored
           environment:
             RUST_TEST_THREADS: 1
 
       - run:
-          name: Test with blst enabled 
+          name: Test with blst enabled (<< parameters.crate >>)
           command: |
             ulimit -n 20000
             ulimit -u 20000
             ulimit -n 20000
-            cargo +nightly -Zpackage-features test --all --no-default-features --features gpu,blst --verbose
+            cargo +nightly -Zpackage-features test --all --no-default-features --features gpu,blst --verbose  --package << parameters.crate >>
 
 
   bench:
@@ -406,6 +412,7 @@ workflows:
       - clippy:
           requires:
             - cargo_fetch
+
       - test_release:
           requires:
             - cargo_fetch
@@ -439,14 +446,124 @@ workflows:
           requires:
             - cargo_fetch
             - ensure_groth_parameters_and_keys_linux
+
       - test_blst:
+          name: test_blst_filecoin_proofs
+          crate: "filecoin-proofs"
           requires:
             - cargo_fetch
             - ensure_groth_parameters_and_keys_linux
+
       - test:
+          name: test_filecoin_proofs
+          crate: "filecoin-proofs"
           requires:
             - cargo_fetch
             - ensure_groth_parameters_and_keys_linux
+
+      - test_blst:
+          name: test_blst_storage_proofs_core
+          crate: "storage-proofs-core"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
+      - test:
+          name: test_storage_proofs_core
+          crate: "storage-proofs-core"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
+      - test_blst:
+          name: test_blst_storage_proofs_post
+          crate: "storage-proofs-post"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
+      - test:
+          name: test_storage_proofs_post
+          crate: "storage-proofs-post"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
+
+      - test_blst:
+          name: test_blst_storage_proofs_porep
+          crate: "storage-proofs-porep"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
+      - test:
+          name: test_storage_proofs_porep
+          crate: "storage-proofs-porep"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
+
+      - test_blst:
+          name: test_blst_fil_proofs_tooling
+          crate: "fil-proofs-tooling"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
+      - test:
+          name: test_fil_proofs_tooling
+          crate: "fil-proofs-tooling"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
+      - test_blst:
+          name: test_blst_sha2raw
+          crate: "sha2raw"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
+      - test:
+          name: test_sha2raw
+          crate: "sha2raw"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
+            
+      - test_blst:
+          name: test_blst_phase2
+          crate: "phase2"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
+      - test:
+          name: test_phase2
+          crate: "phase2"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
+      - test_blst:
+          name: test_blst_filecoin_hashers
+          crate: "filecoin-hashers"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
+      - test:
+          name: test_filecoin_hashers
+          crate: "filecoin-hashers"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
+
+
       - bench:
           requires:
             - cargo_fetch
