@@ -168,6 +168,9 @@ jobs:
     parameters:
       crate:
         type: string
+      features:
+        type: string
+        default: "gpu,blst"
     steps:
       - configure_environment_variables
       - checkout
@@ -183,7 +186,7 @@ jobs:
             ulimit -n 20000
             ulimit -u 20000
             ulimit -n 20000
-            cargo +nightly -Zpackage-features test --no-default-features --features gpu,blst --verbose --release --package << parameters.crate >> -- --ignored
+            cargo +nightly -Zpackage-features test --no-default-features --features << parameters.features >> --verbose --release --package << parameters.crate >>
           environment:
             RUST_TEST_THREADS: 1
 
@@ -211,7 +214,7 @@ jobs:
             ulimit -n 20000
             ulimit -u 20000
             ulimit -n 20000
-            cargo +nightly -Zpackage-features test --no-default-features --features gpu,blst --verbose  --package << parameters.crate >>
+            cargo +nightly -Zpackage-features test --no-default-features --features gpu,blst --verbose  --package << parameters.crate >> --release -- --ignored
 
 
   bench:
@@ -584,6 +587,7 @@ workflows:
       - test_blst:
           name: test_blst_filecoin_hashers
           crate: "filecoin-hashers"
+          features: "blst,gpu,poseidon,sha256,blake2s"
           requires:
             - cargo_fetch
             - ensure_groth_parameters_and_keys_linux
