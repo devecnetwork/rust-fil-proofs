@@ -183,7 +183,7 @@ jobs:
             ulimit -n 20000
             ulimit -u 20000
             ulimit -n 20000
-            cargo +nightly -Zpackage-features --no-default-features --features gpu,blst --verbose --release --test api --package << parameters.crate >> -- --ignored
+            cargo +nightly -Zpackage-features test --no-default-features --features gpu,blst --verbose --release --package << parameters.crate >> -- --ignored
           environment:
             RUST_TEST_THREADS: 1
 
@@ -526,14 +526,14 @@ workflows:
             
       - test_blst:
           name: test_blst_phase2
-          crate: "phase2"
+          crate: "filecoin-phase2"
           requires:
             - cargo_fetch
             - ensure_groth_parameters_and_keys_linux
 
       - test:
           name: test_phase2
-          crate: "phase2"
+          crate: "filecoin-phase2"
           requires:
             - cargo_fetch
             - ensure_groth_parameters_and_keys_linux
