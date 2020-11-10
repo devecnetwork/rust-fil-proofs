@@ -65,16 +65,6 @@ jobs:
           name: Test (<< parameters.crate >>)
           command: cargo +$(cat rust-toolchain) test --verbose --package << parameters.crate >>
           no_output_timeout: 15m
-      - run:
-          name: Prune the output files
-          command: |
-            for file in target/debug/* target/debug/.??*; do
-              [ -d $file -o ! -x $file ] && rm -r $file
-            done
-      - persist_to_workspace:
-          root: "."
-          paths:
-            - target/debug/*
 
   test_release:
     docker:
@@ -193,7 +183,7 @@ jobs:
             ulimit -n 20000
             ulimit -u 20000
             ulimit -n 20000
-            cargo +nightly -Zpackage-features test --all --no-default-features --features gpu,blst --verbose --release --test api --package << parameters.crate >> -- --ignored
+            cargo +nightly -Zpackage-features --no-default-features --features gpu,blst --verbose --release --test api --package << parameters.crate >> -- --ignored
           environment:
             RUST_TEST_THREADS: 1
 
@@ -203,7 +193,7 @@ jobs:
             ulimit -n 20000
             ulimit -u 20000
             ulimit -n 20000
-            cargo +nightly -Zpackage-features test --all --no-default-features --features gpu,blst --verbose  --package << parameters.crate >>
+            cargo +nightly -Zpackage-features test --no-default-features --features gpu,blst --verbose  --package << parameters.crate >>
 
 
   bench:
