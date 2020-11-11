@@ -220,6 +220,7 @@ mod tests {
         Tree::Store: 'static,
     {
         let rng = &mut XorShiftRng::from_seed(crate::TEST_SEED);
+        pretty_env_logger::try_init().ok();
 
         let leaves = 64 * get_base_tree_count::<Tree>();
         let sector_size = (leaves * NODE_SIZE) as u64;
@@ -238,7 +239,7 @@ mod tests {
         };
 
         let temp_dir = tempfile::tempdir().unwrap();
-        let temp_path = temp_dir.path();
+        let temp_path = dbg!(temp_dir.path());
 
         let mut pub_sectors = Vec::new();
         let mut priv_sectors = Vec::new();

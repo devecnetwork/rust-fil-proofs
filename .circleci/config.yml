@@ -186,7 +186,7 @@ jobs:
             ulimit -n 20000
             ulimit -u 20000
             ulimit -n 20000
-            cargo +nightly -Zpackage-features test --no-default-features --features << parameters.features >> --verbose --release --package << parameters.crate >>
+            RUST_LOG=trace cargo +nightly -Zpackage-features test --no-default-features --features << parameters.features >> --verbose --release --package << parameters.crate >>
           environment:
             RUST_TEST_THREADS: 1
 
