@@ -600,6 +600,20 @@ workflows:
             - ensure_groth_parameters_and_keys_linux
 
 
+      - test_blst:
+          name: test_blst_fil_proofs_param
+          crate: "filecoin-proofs-param"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
+      - test:
+          name: test_fil_proofs_param
+          crate: "filecoin-fil-proofs-param"
+          requires:
+            - cargo_fetch
+            - ensure_groth_parameters_and_keys_linux
+
       - bench:
           requires:
             - cargo_fetch
