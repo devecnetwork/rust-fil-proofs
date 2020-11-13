@@ -25,7 +25,7 @@ use storage_proofs_core::{
 
 use super::super::{
     cache::ParentCache,
-    cores::{bind_core, checkout_core_group, CoreIndex},
+    cores::{self, bind_core, checkout_core_group},
     graph::{StackedBucketGraph, DEGREE, EXP_DEGREE},
     memory_handling::{setup_create_label_memory, CacheReader},
     params::{Labels, LabelsCache},
@@ -205,14 +205,14 @@ fn create_layer_labels(
     exp_labels: Option<&mut MmapMut>,
     num_nodes: u64,
     cur_layer: u32,
-    core_group: Arc<Option<MutexGuard<'_, Vec<CoreIndex>>>>,
+    core_group: Arc<Option<MutexGuard<'_, Vec<u32>>>>,
 ) -> Result<()> {
     info!("Creating labels for layer {}", cur_layer);
     // num_producers is the number of producer threads
     let (lookahead, num_producers, producer_stride) = {
         let settings = &settings::SETTINGS;
         let lookahead = settings.multicore_sdr_lookahead;
-        let num_producers = settings.multicore_sdr_producers;
+        let num_producers = cores::actual_cores_per_unit();
         // NOTE: Stride must not exceed the number of nodes in parents_cache's window. If it does, the process will deadlock
         // with producers and consumers waiting for each other.
         let producer_stride = settings
